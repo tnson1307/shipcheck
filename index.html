@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ShipCheck</title>
+<meta name="description" content="A native macOS app that audits your Xcode project against real App Store Connect data before you submit — catching IAP mismatches, Privacy Manifest gaps, and missing App Information before Apple does." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#0b1220;
+    --surface:#121b2e;
+    --surface-raised:#1a2740;
+    --line:#2a3b57;
+    --line-soft:#1e2c45;
+    --ink:#edeff2;
+    --ink-muted:#93a0b8;
+    --ink-faint:#5c6b85;
+    --accent:#dd6b26;
+    --accent-bright:#f2894a;
+    --accent-ink:#241207;
+    --pass:#3fa66e;
+    --warn:#d8a63d;
+    --radius:3px;
+    --content-w:880px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;}
+  a{color:inherit;}
+  ::selection{background:var(--accent);color:var(--accent-ink);}
+
+  h1,h2,h3{
+    font-family:"Big Shoulders Display", "Arial Narrow", sans-serif;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+    text-wrap:balance;
+    margin:0;
+    color:var(--ink);
+  }
+
+  .mono{font-family:"IBM Plex Mono", ui-monospace, monospace;}
+
+  .wrap{max-width:var(--content-w);margin:0 auto;padding:0 28px;}
+
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent-bright);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;height:1px;
+    background:var(--accent-bright);
+    display:inline-block;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(11,18,32,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav{
+    max-width:var(--content-w);margin:0 auto;padding:16px 28px;
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+  }
+  .wordmark{
+    font-family:"Big Shoulders Display",sans-serif;
+    font-weight:800;font-size:22px;letter-spacing:0.03em;
+    text-transform:uppercase;
+    display:flex;align-items:center;gap:9px;
+  }
+  .wordmark .dot{width:9px;height:9px;background:var(--accent);border-radius:1px;transform:rotate(45deg);flex:none;}
+  .navlinks{display:flex;gap:26px;font-size:14px;color:var(--ink-muted);}
+  .navlinks a{text-decoration:none;transition:color .15s;}
+  .navlinks a:hover,.navlinks a:focus-visible{color:var(--ink);}
+  @media (max-width:640px){.navlinks{display:none;}}
+
+  .btn{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:13.5px;font-weight:600;letter-spacing:0.02em;
+    text-decoration:none;text-transform:uppercase;
+    padding:11px 20px;border-radius:var(--radius);
+    display:inline-flex;align-items:center;gap:9px;
+    border:1px solid transparent;
+    cursor:pointer;transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .btn:focus-visible{outline:2px solid var(--accent-bright);outline-offset:2px;}
+  .btn-primary{background:var(--accent);color:var(--accent-ink);}
+  .btn-primary:hover{background:var(--accent-bright);transform:translateY(-1px);}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--ink-muted);}
+  .btn-sm{padding:9px 14px;font-size:12.5px;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:96px 0 72px;
+    border-bottom:1px solid var(--line-soft);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(115deg, rgba(221,107,38,0.05) 0 2px, transparent 2px 64px);
+    pointer-events:none;
+  }
+  .hero-inner{position:relative;}
+  .hero h1{
+    font-size:clamp(40px,6.4vw,74px);
+    line-height:0.98;
+    margin-top:22px;
+    max-width:13ch;
+  }
+  .hero h1 em{
+    font-style:normal;color:var(--accent);
+  }
+  .hero p.lede{
+    font-size:18px;
+    color:var(--ink-muted);
+    max-width:52ch;
+    margin-top:22px;
+  }
+  .hero-cta{
+    margin-top:36px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:20px;
+  }
+  .hero-meta{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12.5px;color:var(--ink-faint);
+  }
+
+  /* stamp counter */
+  .stamp{
+    margin-top:52px;
+    display:inline-flex;align-items:center;gap:22px;
+    padding:18px 24px;
+    border:1px dashed var(--line);
+    border-radius:var(--radius);
+    background:var(--surface);
+  }
+  .stamp-figure{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-weight:600;font-size:34px;color:var(--ink);min-width:2ch;}
+  .stamp-label{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-muted);line-height:1.4;}
+  .stamp.is-empty{
+    border-color:var(--accent);
+    transform:rotate(-1.2deg);
+  }
+  .stamp.is-empty .stamp-figure{
+    font-family:"Big Shoulders Display",sans-serif;
+    font-size:20px;font-weight:800;letter-spacing:0.03em;
+    color:var(--accent-bright);
+    min-width:0;
+  }
+
+  /* ---------- checklist / features ---------- */
+  section{padding:76px 0;border-bottom:1px solid var(--line-soft);}
+  .section-head{max-width:60ch;margin-bottom:44px;}
+  .section-head h2{font-size:clamp(28px,4vw,40px);margin-top:14px;}
+  .section-head p{color:var(--ink-muted);margin-top:14px;font-size:16px;}
+
+  .checklist{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;}
+  .check-item{
+    background:var(--surface);
+    padding:22px 24px;
+    display:grid;grid-template-columns:28px 1fr;gap:16px;
+    align-items:start;
+  }
+  .check-mark{
+    width:20px;height:20px;border-radius:3px;
+    background:rgba(63,166,110,0.14);
+    border:1px solid rgba(63,166,110,0.5);
+    display:flex;align-items:center;justify-content:center;
+    margin-top:2px;flex:none;
+  }
+  .check-mark svg{width:12px;height:12px;stroke:var(--pass);}
+  .check-item h3{
+    font-family:"IBM Plex Sans",sans-serif;
+    text-transform:none;
+    font-weight:600;font-size:16.5px;letter-spacing:0;
+    color:var(--ink);
+  }
+  .check-item p{margin:6px 0 0;color:var(--ink-muted);font-size:14.5px;line-height:1.55;}
+  .check-item .tag{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--accent-bright);display:block;margin-bottom:6px;
+  }
+
+  /* ---------- privacy strip ---------- */
+  .privacy-strip{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 30px;
+    display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;
+  }
+  @media (max-width:640px){.privacy-strip{grid-template-columns:1fr;}}
+  .privacy-strip .glyph{
+    font-family:"Big Shoulders Display",sans-serif;font-size:40px;font-weight:800;color:var(--accent);line-height:1;
+  }
+  .privacy-strip p{margin:0;color:var(--ink-muted);font-size:14.5px;}
+  .privacy-strip strong{color:var(--ink);font-weight:600;}
+
+  /* ---------- steps ---------- */
+  .steps{counter-reset:step;display:grid;gap:0;}
+  .step{
+    display:grid;grid-template-columns:56px 1fr;gap:20px;
+    padding:26px 0;border-top:1px solid var(--line-soft);
+  }
+  .step:first-child{border-top:none;}
+  .step-num{
+    counter-increment:step;
+    font-family:"Big Shoulders Display",sans-serif;font-weight:800;font-size:30px;
+    color:var(--line);
+  }
+  .step-num::before{content:counter(step,decimal-leading-zero);}
+  .step h3{
+    font-family:"IBM Plex Sans",sans-serif;text-transform:none;font-weight:600;
+    font-size:17px;letter-spacing:0;color:var(--ink);
+  }
+  .step p{margin:8px 0 0;color:var(--ink-muted);font-size:14.5px;max-width:60ch;}
+  .step code{
+    font-family:"IBM Plex Mono",monospace;font-size:13px;
+    background:var(--surface);border:1px solid var(--line);
+    padding:1px 7px;border-radius:2px;color:var(--accent-bright);
+  }
+  .why-box{
+    margin-top:32px;padding:22px 24px;
+    background:var(--surface);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;
+  }
+  .why-box p{margin:0;color:var(--ink-muted);font-size:14.5px;}
+  .why-box strong{color:var(--ink);}
+
+  /* ---------- pricing ---------- */
+  .price-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:36px;position:relative;
+  }
+  .price-card::before{
+    content:"BETA";
+    position:absolute;top:20px;right:20px;
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:0.14em;
+    color:var(--accent-bright);border:1px solid var(--accent);padding:3px 9px;border-radius:2px;
+    transform:rotate(3deg);
+  }
+  .price-card h3{font-size:26px;}
+  .price-card .price{
+    font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink-muted);margin-top:10px;
+  }
+  .price-list{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:11px;}
+  .price-list li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink-muted);}
+  .price-list li::before{content:"—";color:var(--accent);flex:none;}
+  .price-footnote{margin-top:28px;font-size:13.5px;color:var(--ink-faint);max-width:64ch;line-height:1.6;}
+
+  /* ---------- feedback ---------- */
+  .feedback{
+    display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center;
+    background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius);
+    padding:34px 36px;
+  }
+  @media (max-width:640px){.feedback{grid-template-columns:1fr;}}
+  .feedback h2{font-size:26px;}
+  .feedback p{color:var(--ink-muted);margin-top:10px;font-size:14.5px;max-width:52ch;}
+
+  footer{padding:44px 0 60px;}
+  .foot-row{
+    display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px;
+    font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-faint);
+  }
+  .foot-row a{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line);}
+  .foot-row a:hover{color:var(--ink);}
+
+  @media (prefers-reduced-motion:no-preference){
+    .reveal{opacity:0;transform:translateY(14px);animation:rise .6s ease forwards;}
+    .reveal:nth-child(1){animation-delay:.02s;}
+    .reveal:nth-child(2){animation-delay:.12s;}
+    .reveal:nth-child(3){animation-delay:.22s;}
+    .reveal:nth-child(4){animation-delay:.32s;}
+    @keyframes rise{to{opacity:1;transform:none;}}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <span class="wordmark"><span class="dot"></span>ShipCheck</span>
+    <nav class="navlinks">
+      <a href="#checks">What it checks</a>
+      <a href="#credentials">Setup</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#feedback">Feedback</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="https://github.com/tnson1307/shipcheck/releases/latest/download/ShipCheck.zip">Download</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <span class="eyebrow reveal">Pre-submission audit for macOS &amp; iOS apps</span>
+    <h1 class="reveal">Stamp it cleared<br>before Apple stamps it <em>rejected.</em></h1>
+    <p class="lede reveal">ShipCheck reads your actual Xcode project and your actual App Store Connect data — then tells you exactly what will bounce your submission, before you find out from Apple.</p>
+    <div class="hero-cta reveal">
+      <a class="btn btn-primary" href="https://github.com/tnson1307/shipcheck/releases/latest/download/ShipCheck.zip">Download for macOS</a>
+      <span class="hero-meta">macOS 14+ · Free during beta · No account required</span>
+    </div>
+    <div id="stampWrap" class="stamp reveal" aria-live="polite">
+      <span class="stamp-figure" id="stampFigure">—</span>
+      <span class="stamp-label" id="stampLabel">Loading manifest count…</span>
+    </div>
+  </div>
+</section>
+
+<section id="checks">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The manifest</span>
+      <h2>Five things Apple checks that you'll forget you answered</h2>
+      <p>Not a linter. ShipCheck cross-references your code against the live state of your App Store Connect record, so it catches drift — the mismatch that crept in six builds ago, not just typos.</p>
+    </div>
+
+    <div class="checklist">
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">IAP &amp; Subscriptions</span>
+          <h3>Every product ID, cross-checked</h3>
+          <p>Diffs the product IDs in your <span class="mono">.storekit</span> config and source code against what's actually registered in App Store Connect — the mismatch that causes a silent purchase failure in production.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">Privacy Manifest</span>
+          <h3>Required Reason APIs, declared correctly</h3>
+          <p>Scans your code and every bundled third-party framework for Apple's Required Reason APIs, checks them against <span class="mono">PrivacyInfo.xcprivacy</span>, and drafts a reason code for anything undeclared.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">App Information &amp; Review</span>
+          <h3>Everything human review looks at first</h3>
+          <p>Name, subtitle, keywords, description, screenshots, support URL, copyright, demo account, review notes — pulled live from App Store Connect and checked before a reviewer ever opens your build.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">Age Rating</span>
+          <h3>What your code implies vs. what you declared</h3>
+          <p>Compares content signals actually detected in your project against your declared App Store Connect age rating answers.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">The recurring five</span>
+          <h3>Export compliance, ATT, Sign in with Apple, and more</h3>
+          <p>Export Compliance, missing permission usage strings, App Tracking Transparency, Sign in with Apple requirements, and Background Modes consistency — the declarations easy to get wrong precisely because you got them right last time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="privacy-strip">
+      <span class="glyph">100%</span>
+      <p><strong>Runs entirely on your Mac.</strong> There is no ShipCheck server. Every App Store Connect call goes straight from your machine to Apple, signed with a request token ShipCheck generates locally. AI features are optional and bring your own key — off by default.</p>
+    </div>
+  </div>
+</section>
+
+<section id="credentials">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Setup</span>
+      <h2>Connect your App Store Connect account</h2>
+      <p>ShipCheck needs three things from Apple to read your app's real data. Here's exactly where to find them.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num"></span>
+        <div>
+          <h3>Open your API keys page</h3>
+          <p>In App Store Connect, go to <strong>Users and Access → Integrations → App Store Connect API</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num"></span>
+        <div>
+          <h3>Generate a key</h3>
+          <p>Click <strong>Generate API Key</strong>, give it a name, and grant it Developer or App Manager access — either is enough for everything ShipCheck reads.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num"></span>
+        <div>
+          <h3>Copy the Key ID and Issuer ID</h3>
+          <p>Both appear right on that page next to your new key, e.g. <code>Key ID: 2X9R7B4K3P</code> and <code>Issuer ID: 69a6de…</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num"></span>
+        <div>
+          <h3>Download the <span class="mono">.p8</span> file — now</h3>
+          <p>Apple only lets you download this once. Save it somewhere you won't lose it before you navigate away from the page.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num"></span>
+        <div>
+          <h3>Paste all three into ShipCheck</h3>
+          <p>Open ShipCheck → <strong>Settings → App Store Connect</strong>, enter the Key ID and Issuer ID, and choose the <span class="mono">.p8</span> file.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="why-box">
+      <p><strong>Why does ShipCheck need this?</strong> Apple's App Store Connect API requires every request to carry a signed token proving it's really you. ShipCheck builds and signs that token locally, on your Mac, using the key you just downloaded — the file itself is stored in your Keychain and never transmitted anywhere except directly to Apple.</p>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Pricing</span>
+      <h2>Free right now. That's not a trial.</h2>
+    </div>
+    <div class="price-card">
+      <h3>Full access, no card</h3>
+      <p class="price">$0 — during the public beta</p>
+      <ul class="price-list">
+        <li>Every check, every category, unlimited projects</li>
+        <li>Live App Store Connect integration on your Mac, no time limit</li>
+        <li>If you download during the beta, this stays free for you — permanently, even after paid tiers launch</li>
+      </ul>
+      <p class="price-footnote">After the beta, new installs get one project with full App Store Connect integration for free, then <span class="mono">$29.99/yr</span> or <span class="mono">$89.99 once</span> for unlimited projects. Local-only checks (Privacy Manifest, declarations, IAP against your local <span class="mono">.storekit</span>) always stay free, on every project, no account needed.</p>
+    </div>
+  </div>
+</section>
+
+<section id="feedback" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="feedback">
+      <div>
+        <h2>Found something wrong with the manifest?</h2>
+        <p>Every bug report and feature request is read directly by the person building this — no support tickets, no forms. Tell me what ShipCheck missed, or what it should check next.</p>
+      </div>
+      <a class="btn btn-ghost" href="https://github.com/tnson1307/shipcheck/issues/new">Open an issue on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <span>ShipCheck · macOS 14+ · v1.0</span>
+    <span><a href="https://github.com/tnson1307/shipcheck/releases">Release notes</a> · <a href="https://github.com/tnson1307/shipcheck/issues/new">Feedback</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var figure = document.getElementById('stampFigure');
+  var label = document.getElementById('stampLabel');
+  var wrap = document.getElementById('stampWrap');
+
+  function showEmpty() {
+    wrap.classList.add('is-empty');
+    figure.textContent = 'BE THE FIRST';
+    label.textContent = 'No downloads logged yet — yours could be #1.';
+  }
+
+  function showCount(total) {
+    if (total <= 0) { showEmpty(); return; }
+    figure.textContent = total.toLocaleString('en-US');
+    label.textContent = total === 1 ? 'Mac has run ShipCheck' : 'Macs have run ShipCheck';
+  }
+
+  fetch('https://api.github.com/repos/tnson1307/shipcheck/releases')
+    .then(function (r) { if (!r.ok) throw new Error('bad response'); return r.json(); })
+    .then(function (releases) {
+      var total = 0;
+      releases.forEach(function (r) {
+        (r.assets || []).forEach(function (a) { total += a.download_count || 0; });
+      });
+      showCount(total);
+    })
+    .catch(function () {
+      label.textContent = '';
+      figure.textContent = '';
+      wrap.style.display = 'none';
+    });
+})();
+</script>
+
+</body>
+</html>
