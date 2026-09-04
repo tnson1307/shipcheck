@@ -499,7 +499,7 @@
   function showCount(total) {
     if (total <= 0) { showEmpty(); return; }
     figure.textContent = total.toLocaleString('en-US');
-    label.textContent = total === 1 ? 'Mac has run ShipCheck' : 'Macs have run ShipCheck';
+    label.textContent = total === 1 ? 'Download logged' : 'Downloads logged';
   }
 
   fetch('https://api.github.com/repos/tnson1307/shipcheck/releases')
