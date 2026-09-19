@@ -455,11 +455,51 @@
   </div>
 </section>
 
-<section>
+<section id="security">
   <div class="wrap">
-    <div class="privacy-strip">
-      <span class="glyph">100%</span>
-      <p><strong>Runs entirely on your Mac.</strong> There is no ShipCheck server. Every App Store Connect call goes straight from your machine to Apple, signed with a request token ShipCheck generates locally. AI features are optional and bring your own key — off by default.</p>
+    <div class="section-head">
+      <span class="eyebrow">Security</span>
+      <h2>Why it's safe to connect your App Store Connect account</h2>
+      <p>Handing an API key to a new tool should feel uncomfortable. Here's exactly what ShipCheck does with yours — nothing hidden.</p>
+    </div>
+
+    <div class="checklist">
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">Storage</span>
+          <h3>Kept in your Keychain, not a plain file</h3>
+          <p>Your <span class="mono">.p8</span> key is stored in macOS Keychain with access control, unlocked only after you unlock your Mac — never written to disk as a plain file.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">In transit</span>
+          <h3>Signed locally, never transmitted</h3>
+          <p>ShipCheck signs its own request token on your Mac. Only that signed token — never the private key itself — is sent, straight to Apple.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">Architecture</span>
+          <h3>No backend, ever</h3>
+          <p>There is no ShipCheck server to breach. Every App Store Connect call goes directly from your machine to Apple's API.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">Not a new idea</span>
+          <h3>The same credentials fastlane already asks for</h3>
+          <p>Key ID, Issuer ID, and a <span class="mono">.p8</span> file are the exact three values fastlane — the tool most professional iOS teams already trust — has used for years. ShipCheck's Keychain-backed storage is more restrictive than fastlane's typical plain-file setup.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="why-box">
+      <p><strong>The tradeoff, stated plainly:</strong> ShipCheck doesn't run inside Apple's App Sandbox — it needs full filesystem access to read your Xcode project. That's exactly why the setup steps below have you create a key scoped to the <strong>Developer</strong> role rather than Admin: least privilege, so there's less at risk even in a worst case.</p>
     </div>
   </div>
 </section>
@@ -484,7 +524,7 @@
         <span class="step-num"></span>
         <div>
           <h3>Generate a key</h3>
-          <p>Click <strong>Generate API Key</strong>, give it a name, and grant it Developer or App Manager access — either is enough for everything ShipCheck reads.</p>
+          <p>Click <strong>Generate API Key</strong>, give it a name, and grant it <strong>Developer</strong> access — the minimum role ShipCheck needs. Avoid Admin: a key scoped to Developer cannot touch users, agreements, or finances, so there is less exposure if it were ever compromised.</p>
         </div>
       </div>
       <div class="step">
