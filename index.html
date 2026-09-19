@@ -418,7 +418,7 @@
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">The manifest</span>
-      <h2>Five things Apple checks that you'll forget you answered</h2>
+      <h2>Everything Apple checks that you'll forget you answered</h2>
       <p>Not a linter. ShipCheck cross-references your code against the live state of your App Store Connect record, so it catches drift — the mismatch that crept in six builds ago, not just typos.</p>
     </div>
 
@@ -436,7 +436,7 @@
         <div>
           <span class="tag">Privacy Manifest</span>
           <h3>Required Reason APIs, declared correctly</h3>
-          <p>Scans your code and every bundled third-party framework for Apple's Required Reason APIs, checks them against <span class="mono">PrivacyInfo.xcprivacy</span>, and drafts a reason code for anything undeclared.</p>
+          <p>Scans your code and every bundled third-party framework for Apple's Required Reason APIs, checks them against <span class="mono">PrivacyInfo.xcprivacy</span>, and drafts a reason code for anything undeclared — rule-based first, with optional AI (bring your own key) filling in the gaps a rule doesn't cover.</p>
         </div>
       </div>
       <div class="check-item">
@@ -444,7 +444,7 @@
         <div>
           <span class="tag">App Information &amp; Review</span>
           <h3>Everything human review looks at first</h3>
-          <p>Name, subtitle, keywords, description, screenshots, support URL, copyright, demo account, review notes — pulled live from App Store Connect and checked before a reviewer ever opens your build.</p>
+          <p>Name, subtitle, keywords, description, support URL, copyright, demo account, review notes — pulled live from App Store Connect and checked before a reviewer ever opens your build.</p>
         </div>
       </div>
       <div class="check-item">
@@ -453,6 +453,22 @@
           <span class="tag">Age Rating</span>
           <h3>What your code implies vs. what you declared</h3>
           <p>Compares content signals actually detected in your project against your declared App Store Connect age rating answers.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">Screenshots</span>
+          <h3>Missing screenshot sets, caught before Apple asks</h3>
+          <p>Checks what's actually uploaded to your most recent App Store Connect version, per device size and locale — not just whether you remembered, but whether it actually saved.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">Legal Documents</span>
+          <h3>Privacy Policy and Terms of Use, drafted for you</h3>
+          <p>Generates a starting draft of both from the data collection ShipCheck actually detected in your project — something to review and publish, not boilerplate you write from scratch.</p>
         </div>
       </div>
       <div class="check-item">
@@ -506,6 +522,14 @@
           <span class="tag">Not a new idea</span>
           <h3>The same credentials fastlane already asks for</h3>
           <p>Key ID, Issuer ID, and a <span class="mono">.p8</span> file are the exact three values fastlane — the tool most professional iOS teams already trust — has used for years. ShipCheck's Keychain-backed storage is more restrictive than fastlane's typical plain-file setup.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-mark"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div>
+          <span class="tag">AI, if you want it</span>
+          <h3>Bring your own key, or skip it entirely</h3>
+          <p>AI only ever assists with one thing: suggesting a Privacy Manifest reason code when no rule matches. Off by default — add a key from Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek, or xAI, and calls go straight from your Mac to that provider, never through ShipCheck.</p>
         </div>
       </div>
     </div>
