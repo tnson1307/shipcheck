@@ -548,7 +548,7 @@
       <p>The same app runs headless — wire it into a build phase or CI job so a product ID mismatch or a missing Privacy Manifest entry fails the build right away, instead of surfacing weeks later right before you submit.</p>
     </div>
     <pre class="cli-snippet"><code>/Applications/ShipCheck.app/Contents/MacOS/ShipCheck --ci /path/to/your/project</code></pre>
-    <p class="cli-note">Always runs the checks that need no App Store Connect account — IAP ID consistency, Privacy Manifest, and Other Declarations — and exits non-zero on any blocking finding. Optionally add your API key as an environment variable to also run a real IAP diff against App Store Connect. <a href="https://github.com/tnson1307/shipcheck#command-line--ci-mode" class="cli-link">Full setup guide, including React Native projects →</a></p>
+    <p class="cli-note">Always runs the checks that need no App Store Connect account — IAP ID consistency, Privacy Manifest, and Other Declarations — and exits non-zero on any blocking finding. Optionally add your API key as an environment variable to also run a real IAP diff against App Store Connect, or wire it into a git pre-commit hook to catch drift before it's even pushed. <a href="https://github.com/tnson1307/shipcheck#command-line--ci-mode" class="cli-link">Full setup guide, including React Native projects →</a></p>
   </div>
 </section>
 

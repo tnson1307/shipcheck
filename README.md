@@ -34,6 +34,21 @@ ln -s /Applications/ShipCheck.app/Contents/MacOS/ShipCheck /opt/homebrew/bin/shi
 
 Then: `shipcheck --ci .`
 
+### Running before every commit, not just in CI
+
+A CI job only reports back once a commit is already pushed and visible to
+everyone else. Wiring the same checks into a git pre-commit hook catches
+drift earlier — while it's still quietly yours to fix:
+
+```sh
+shipcheck --install-hook /path/to/your/project
+```
+
+Every commit in that repo now runs ShipCheck first and gets blocked if a
+blocking finding turns up; skip it once with `git commit --no-verify`.
+Safe to run again later, and never overwrites a pre-existing hook that
+isn't ShipCheck's — it prints the line to add by hand instead.
+
 ### Including the live App Store Connect checks
 
 Set these environment variables to also run a real IAP diff against App
