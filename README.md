@@ -22,9 +22,13 @@ repo root.
 This always runs the checks that need no App Store Connect account — IAP
 ID consistency, Privacy Manifest / Required Reason APIs, and the
 Additional Declarations (Export Compliance, permission strings, ATT, Sign
-in with Apple, Background Modes) — and exits non-zero if any blocking
-finding is found, so it can gate a CI job or an Xcode Run Script build
-phase.
+in with Apple, Background Modes), so it can gate a CI job or an Xcode Run
+Script build phase.
+
+**Exit codes**: `0` clean, `1` any blocking finding, `2` warnings only (no
+blocking) — e.g. a custom-encryption/export-compliance warning, or an IAP
+product still needing attention in App Store Connect. A plain "exit code
+!= 0 fails" check in your pipeline is safe by default against both.
 
 For a shorter command, symlink it onto your `PATH` once:
 
